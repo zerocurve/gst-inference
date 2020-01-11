@@ -36,6 +36,7 @@ static void node_get_children (GNode * node, gpointer data);
 static gpointer node_copy (gconstpointer node, gpointer data);
 static gpointer node_scale (gconstpointer node, gpointer data);
 static gboolean node_assign (GNode * node, gpointer data);
+static gboolean check_prediction_id (GNode * node, gpointer data);
 
 static guint64 get_new_id (void);
 
@@ -138,7 +139,6 @@ node_copy (gconstpointer node, gpointer data)
   GstInferencePrediction *self = (GstInferencePrediction *) node;
 
   g_return_val_if_fail (node, NULL);
-  g_return_val_if_fail (data, NULL);
 
   return prediction_copy (self);
 }
@@ -149,7 +149,6 @@ node_assign (GNode * node, gpointer data)
   GstInferencePrediction *pred = (GstInferencePrediction *) node->data;
 
   g_return_val_if_fail (node, FALSE);
-  g_return_val_if_fail (data, FALSE);
 
   pred->predictions = node;
 
@@ -435,4 +434,49 @@ gst_inference_prediction_scale (GstInferencePrediction * self,
   g_node_traverse (other, G_IN_ORDER, G_TRAVERSE_ALL, -1, node_assign, NULL);
 
   return (GstInferencePrediction *) other->data;
+}
+
+
+static gboolean
+check_prediction_id (GNode * node, gpointer data)
+{
+  GstInferencePrediction *root = (GstInferencePrediction *) node->data;
+  GstInferencePrediction *tmp = NULL;
+
+  g_return_val_if_fail (root != NULL, TRUE);
+  g_return_val_if_fail (data != NULL, TRUE);
+
+  tmp = (GstInferencePrediction *) data;
+
+  if (root->prediction_id == tmp->prediction_id) {
+    /* Prediction was found, return */
+    gst_inference_prediction_unref (tmp);
+    tmp = root;
+    return TRUE;
+  }
+  return FALSE;
+}
+
+GstInferencePrediction *
+gst_inference_prediction_find_by_id (GstInferencePrediction * self, guint id)
+{
+  GstInferencePrediction *ref = NULL;
+  GstInferencePrediction *tmp = NULL;
+
+  g_return_val_if_fail (self, NULL);
+
+  tmp = gst_inference_prediction_new ();
+  tmp->prediction_id = id;
+  ref = tmp;
+
+  g_node_traverse (self->predictions, G_LEVEL_ORDER, G_TRAVERSE_ALL, -1,
+      check_prediction_id, tmp);
+
+  /* Check if we found a prediction with the same ID */
+  if (tmp == ref) {
+    gst_inference_prediction_unref (tmp);
+    tmp = NULL;
+  }
+
+  return tmp;
 }

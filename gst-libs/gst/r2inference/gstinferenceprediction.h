@@ -56,15 +56,15 @@ struct _BoundingBox
  */
 struct _GstInferencePrediction
 {
-  /*<private>*/
+  /*<private> */
   GstMiniObject base;
 
-  /*<public>*/
+  /*<public> */
   guint64 prediction_id;
   gboolean enabled;
   BoundingBox bbox;
-  GList * classifications;
-  GNode * predictions;
+  GList *classifications;
+  GNode *predictions;
 };
 
 /**
@@ -74,7 +74,7 @@ struct _GstInferencePrediction
  *
  * Returns: A newly allocated and initialized GstInferencePrediction.
  */
-GstInferencePrediction * gst_inference_prediction_new (void);
+GstInferencePrediction *gst_inference_prediction_new (void);
 
 /**
  * gst_inference_prediction_reset:
@@ -95,7 +95,8 @@ void gst_inference_prediction_reset (GstInferencePrediction * self);
  *
  * Returns: a newly allocated copy of the original prediction
  */
-GstInferencePrediction * gst_inference_prediction_copy (const GstInferencePrediction * self);
+GstInferencePrediction *gst_inference_prediction_copy (const
+    GstInferencePrediction * self);
 
 /**
  * gst_inference_prediction_ref:
@@ -105,7 +106,8 @@ GstInferencePrediction * gst_inference_prediction_copy (const GstInferencePredic
  *
  * Returns: the same prediction, for convenience purposes.
  */
-GstInferencePrediction * gst_inference_prediction_ref (GstInferencePrediction * self);
+GstInferencePrediction *gst_inference_prediction_ref (GstInferencePrediction *
+    self);
 
 /**
  * gst_inference_prediction_unref:
@@ -126,7 +128,7 @@ void gst_inference_prediction_unref (GstInferencePrediction * self);
  *
  * Returns: a string representing the prediction.
  */
-gchar * gst_inference_prediction_to_string (GstInferencePrediction * self);
+gchar *gst_inference_prediction_to_string (GstInferencePrediction * self);
 
 /**
  * gst_inference_prediction_append:
@@ -137,7 +139,8 @@ gchar * gst_inference_prediction_to_string (GstInferencePrediction * self);
  * children. The parent takes ownership, use
  * gst_inference_prediction_ref() if you wish to keep a reference.
  */
-void gst_inference_prediction_append (GstInferencePrediction * self, GstInferencePrediction * child);
+void gst_inference_prediction_append (GstInferencePrediction * self,
+    GstInferencePrediction * child);
 
 /**
  * gst_inference_prediction_get_children:
@@ -149,7 +152,7 @@ void gst_inference_prediction_append (GstInferencePrediction * self, GstInferenc
  * 
  * Returns: A linked list of the child predictions.
  */
-GSList * gst_inference_prediction_get_children (GstInferencePrediction * self);
+GSList *gst_inference_prediction_get_children (GstInferencePrediction * self);
 
 /**
  * gst_inference_prediction_append_classification:
@@ -159,8 +162,8 @@ GSList * gst_inference_prediction_get_children (GstInferencePrediction * self);
  * A new GstInferenceClassification to associate with this
  * prediction. The prediction takes ownership of the classification
  */
-void gst_inference_prediction_append_classification (GstInferencePrediction * self,
-    GstInferenceClassification * c);
+void gst_inference_prediction_append_classification (GstInferencePrediction *
+    self, GstInferenceClassification * c);
 
 /**
  * gst_inference_prediction_scale:
@@ -175,9 +178,22 @@ void gst_inference_prediction_append_classification (GstInferencePrediction * se
  *
  * Returns: a newly allocated and scaled prediction.
  */
-GstInferencePrediction * gst_inference_prediction_scale (GstInferencePrediction * self,
-    GstVideoInfo * to, GstVideoInfo * from);
+GstInferencePrediction *gst_inference_prediction_scale (GstInferencePrediction *
+    self, GstVideoInfo * to, GstVideoInfo * from);
+
+/**
+ * gst_inference_prediction_find_by_id:
+ * @self: the root prediction
+ * @id: the prediction ID to find
+ *
+ * Goes throughout the whole predictions tree searching for a
+ * prediction matching the given ID
+ *
+ * Returns: the prediction found or NULL if any prediction matches the ID.
+ */
+GstInferencePrediction
+    * gst_inference_prediction_find_by_id (GstInferencePrediction * self,
+    guint id);
 
 G_END_DECLS
-
 #endif // __GST_INFERENCE_PREDICTION__
